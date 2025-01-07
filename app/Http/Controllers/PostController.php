@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Post\CommentPostCreateRequest;
 use App\Http\Requests\Post\PostCreateRequest;
-use App\Models\Blog;
+use App\Models\Post;
 use App\Models\Comment;
+use App\Models\Like;
 use Illuminate\Contracts\View\View;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -18,7 +20,7 @@ class PostController extends Controller
     public function index(): View
     {
         return view('post.postList',  [
-            'blogs' => Blog::all()->where('user_id', Auth::id())
+            'posts' => Post::all()->where('user_id', Auth::id())
         ]);
     }
 
@@ -38,7 +40,7 @@ class PostController extends Controller
 
         $validatedData = $request->validated();
         $validatedData['user_id'] = Auth::id();
-        $post = Blog::create($validatedData);
+        $post = Post::create($validatedData);
 
         return redirect()->route('posts.index');
     }
@@ -47,9 +49,25 @@ class PostController extends Controller
     {
         $comment = $request->validated();
         $comment['user_id'] = Auth::id();
-        $comment['blog_id'] = $postId;
+        $comment['post_id'] = $postId;
         Comment::create($comment);
         return redirect()->route('posts.show', $postId);
+    }
+
+    public function like(Request $request, $postId)
+    {
+        $post = Post::findOrFail($postId);
+        $user = $request->user();
+
+        if ($post->likes()->where('user_id', $user->id)->exists()) {
+            $post->likes()->where('user_id', $user->id)->delete();
+        } else {
+            $post->likes()->create(['user_id' => $user->id]);
+        }
+
+        return response()->json([
+            'view' => view('post.partials.like-button', compact('post'))->render()
+        ]);
     }
 
     /**
@@ -58,7 +76,7 @@ class PostController extends Controller
     public function show(string $id)
     {
         return view('post.show', [
-            'blog' => Blog::findOrFail($id)
+            'post' => Post::findOrFail($id)
         ]);
     }
 

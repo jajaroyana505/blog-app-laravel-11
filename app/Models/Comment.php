@@ -10,21 +10,22 @@ class Comment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'blog_id',
+        'post_id',
         'user_id',
         'parent_id',
         'content',
     ];
 
-    public function blog()
+    public function post()
     {
-        return $this->belongsTo(Blog::class);
+        return $this->belongsTo(Post::class);
     }
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
 
     public function parent()
     {
