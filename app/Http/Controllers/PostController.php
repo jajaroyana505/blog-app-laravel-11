@@ -41,7 +41,7 @@ class PostController extends Controller
         $validatedData = $request->validated();
         $validatedData['user_id'] = Auth::id();
         $post = Post::create($validatedData);
-
+        $request->session()->flash('success', 'Post has been created successfully!');
         return redirect()->route('posts.index');
     }
 
@@ -83,9 +83,11 @@ class PostController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Post $post)
     {
-        //
+        return view('post.edit', [
+            'post' => $post
+        ]);
     }
 
     /**
@@ -93,14 +95,22 @@ class PostController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        Post::findOrFail($id)->update($request->all());
+        $request->session()->flash('success', 'Post has been updated successfully!');
+        return redirect()->route('posts.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, Post $post)
     {
-        //
+
+        if (!$post->delete()) {
+            $request->session()->flash('fail', 'Post was not deleted!');
+        }
+
+        $request->session()->flash('success', 'Post has been deleted successfully!');
+        return redirect()->route('posts.index');
     }
 }

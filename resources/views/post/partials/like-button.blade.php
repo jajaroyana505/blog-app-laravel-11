@@ -1,7 +1,6 @@
-@props(['post'])
 <div class="inline-flex gap-2">
 
-    <p class="text-slate-600 ">{{$post->likes()->count()}}</p>
+    <p class="text-slate-600 ">{{$post->likes()->count()}} Likes </p>
     <div
         class="{{ $post->likes()->where('user_id', auth()->user()->id)->exists() ? 'text-blue-600' : '' }} cursor-pointer transition-transform transform active:scale-90"
         onclick="toggleLike({{ $post->id }})">
